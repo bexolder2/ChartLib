@@ -87,7 +87,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		hdc = BeginPaint(hWnd, &ps);
 
 		gdi.initDrawing(hdc);
-		chart_grid chart_settings = { 50, 740, Rect(40, 10, 740, 740) };
+		chart_grid chart_settings = { 500, 25000, Rect(40, 10, 740, 740) };
 		gdi.drawCoordinateGrid(chart_settings);
 
 		EndPaint(hWnd, &ps);

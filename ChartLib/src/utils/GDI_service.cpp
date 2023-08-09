@@ -6,6 +6,11 @@ std::unique_ptr<Gdiplus::Graphics> graphics;
 std::unique_ptr<Gdiplus::FontFamily> font_family;
 std::unique_ptr<Gdiplus::Font> font;
 
+long x_axis_segment_pixels_value;
+long x_axis_segment_phisical_value;
+long y_axis_segment_pixels_value;
+long y_axis_segment_phisical_value;
+
 void GDI_service::initGDI()
 {
 	GdiplusStartupInput gdiplusStartupInput;
@@ -30,7 +35,7 @@ void GDI_service::drawRectangle(Rect coord, Color rect_color)
 	graphics->DrawRectangle(&blackPen, coord);
 }
 
-void GDI_service::drawCoordinateGrid(chart_grid chart_settings)
+void GDI_service::drawCoordinateGrid(chart_grid chart_settings, bool disable_x_labels)
 {
 	//Draw border
 	int segmentSize = 5;
@@ -41,10 +46,16 @@ void GDI_service::drawCoordinateGrid(chart_grid chart_settings)
 	Gdiplus::Point pStart = Gdiplus::Point(0, chart_settings.grid_size.Y + chart_settings.grid_size.Height);
 	Gdiplus::Point pEnd = Gdiplus::Point(0, chart_settings.grid_size.Y + chart_settings.grid_size.Height - segmentSize);
 
+	y_axis_segment_phisical_value = chart_settings.segment_value;
+	y_axis_segment_pixels_value = chart_settings.grid_size.Height / numberOfSegments;
+	//For bars chart
+	x_axis_segment_phisical_value = y_axis_segment_phisical_value;
+	x_axis_segment_pixels_value = y_axis_segment_pixels_value;
+
 	//DrawX
 	for (int i = numberOfSegments; i > 0; --i)
 	{		
-		pStart.X = i * chart_settings.segment_value + chart_settings.grid_size.X;
+		pStart.X = i * x_axis_segment_pixels_value + chart_settings.grid_size.X;
 		pEnd.X = pStart.X;
 		graphics->DrawLine(&blackPen, pStart, pEnd);
 	}
@@ -54,15 +65,15 @@ void GDI_service::drawCoordinateGrid(chart_grid chart_settings)
 	pEnd.X = chart_settings.grid_size.X + segmentSize;
 	for (int i = numberOfSegments; i > 0; --i)
 	{
-		pStart.Y = chart_settings.grid_size.Y + chart_settings.grid_size.Height - i * chart_settings.segment_value;
+		pStart.Y = chart_settings.grid_size.Y + chart_settings.grid_size.Height - i * y_axis_segment_pixels_value;
 		pEnd.Y = pStart.Y;
 		graphics->DrawLine(&blackPen, pStart, pEnd);
 	}
 
-	GDI_service::drawTextLabels(chart_settings);
+	GDI_service::drawTextLabels(chart_settings, disable_x_labels);
 }
 
-void GDI_service::drawTextLabels(chart_grid label_settings)
+void GDI_service::drawTextLabels(chart_grid label_settings, bool disable_x_labels)
 {
 	SIZE text_size;
 	long current_number;
@@ -72,15 +83,18 @@ void GDI_service::drawTextLabels(chart_grid label_settings)
 	long numberOfSegments = label_settings.max_value / label_settings.segment_value;
 	PointF label_position(0.0f, label_settings.grid_size.Y + label_settings.grid_size.Height);
 
-	//Labels for X
-	for (long i = 0; i <= numberOfSegments; ++i)
+	if (!disable_x_labels)
 	{
-		current_number = i * label_settings.segment_value;
-		string_number = std::to_wstring(current_number);
-		text_size = GetTextScreenSize(hdc, string_number);
-		label_position.X = i * label_settings.segment_value + label_settings.grid_size.X - text_size.cx / 2;
+		//Labels for X
+		for (long i = 0; i <= numberOfSegments; ++i)
+		{
+			current_number = i * x_axis_segment_pixels_value;
+			string_number = std::to_wstring(i * x_axis_segment_phisical_value);
+			text_size = GetTextScreenSize(hdc, string_number);
+			label_position.X = i * x_axis_segment_pixels_value + label_settings.grid_size.X - text_size.cx / 2;
 
-		graphics->DrawString(string_number.data(), -1, font.get(), label_position, &solid_brush);
+			graphics->DrawString(string_number.data(), -1, font.get(), label_position, &solid_brush);
+		}
 	}
 
 	//Labels for Y	
@@ -88,8 +102,8 @@ void GDI_service::drawTextLabels(chart_grid label_settings)
 	int y_offset = 10;
 	for (long i = 0; i <= numberOfSegments; ++i)
 	{
-		current_number = i * label_settings.segment_value;
-		string_number = std::to_wstring(current_number);		
+		current_number = i * y_axis_segment_pixels_value;
+		string_number = std::to_wstring(i * y_axis_segment_phisical_value);
 		text_size = GetTextScreenSize(hdc, string_number);
 		label_position.X = label_settings.grid_size.X - text_size.cx - x_offset;
 		label_position.Y = label_settings.grid_size.Y + label_settings.grid_size.Height - current_number - y_offset;
@@ -118,6 +132,8 @@ void GDI_service::drawBars(bar_collection bars)
 {
 	for (int i = 0; i < bars.items.size(); ++i)
 	{
+		bars.items[i].coord.Width = 50;
+		//bars.items[i].coord.Height = bars.items[i].value / y_axis_segment_value * ;
 		drawRectangle(bars.items[i]);
 	}
 }
