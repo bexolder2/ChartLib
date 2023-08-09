@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\utils\bar_item.h" />
     <ClInclude Include="src\utils\chart_grid.h" />
     <ClInclude Include="src\utils\headers\GDI_service.h" />
     <ClInclude Include="src\utils\headers\libs.h" />

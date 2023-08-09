@@ -24,6 +24,9 @@
     <ClInclude Include="src\utils\headers\libs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\utils\bar_item.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\utils\GDI_service.cpp">
