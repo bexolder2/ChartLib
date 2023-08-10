@@ -7,7 +7,7 @@ using namespace Gdiplus;
 struct bar_item 
 {
 	Pen* pen;
-	SolidBrush*	brush;
+	SolidBrush* brush;
 	std::wstring label;
 	Gdiplus::Rect coord;
 

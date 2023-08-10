@@ -22,6 +22,11 @@ private:
 	long y_axis_segment_pixels_value;
 	long y_axis_segment_phisical_value;
 	
+	long x_chart_shift;
+	long y_chart_shift;
+
+	long chart_width;
+	long chart_height;
 
 	HDC GetDC();
 	SIZE& GetTextScreenSize(HDC hdc, wstring text);

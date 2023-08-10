@@ -11,6 +11,11 @@ long x_axis_segment_phisical_value;
 long y_axis_segment_pixels_value;
 long y_axis_segment_phisical_value;
 
+long x_chart_shift;
+long y_chart_shift;
+long chart_width;
+long chart_height;
+
 void GDI_service::initGDI()
 {
 	GdiplusStartupInput gdiplusStartupInput;
@@ -46,6 +51,10 @@ void GDI_service::drawCoordinateGrid(chart_grid chart_settings, bool disable_x_l
 	Gdiplus::Point pStart = Gdiplus::Point(0, chart_settings.grid_size.Y + chart_settings.grid_size.Height);
 	Gdiplus::Point pEnd = Gdiplus::Point(0, chart_settings.grid_size.Y + chart_settings.grid_size.Height - segmentSize);
 
+	x_chart_shift = chart_settings.grid_size.X;
+	y_chart_shift = chart_settings.grid_size.Y;
+	chart_width = chart_settings.grid_size.Width;
+	chart_height = chart_settings.grid_size.Height;
 	y_axis_segment_phisical_value = chart_settings.segment_value;
 	y_axis_segment_pixels_value = chart_settings.grid_size.Height / numberOfSegments;
 	//For bars chart
@@ -123,17 +132,21 @@ void GDI_service::drawRectangle(bar_item item)
 	graphics->FillRectangle(item.brush, item.coord);
 	graphics->DrawString(string_number.data(), -1, font.get(), text_position, &solid_brush);
 
-	text_position.X = item.coord.X + ((item.coord.Width - GetTextScreenSize(hdc, item.label).cx) / 2);
-	text_position.Y = item.coord.Y + item.coord.Height - 20;
-	graphics->DrawString(item.label.data(), -1, font.get(), text_position, &solid_brush);
+	text_position.X = item.coord.X + ((item.coord.Width - GetTextScreenSize(hdc, item.label).cx) / 2) + 22;
+	text_position.Y = item.coord.Y + item.coord.Height - 20 - GetTextScreenSize(hdc, item.label).cx;
+	StringFormat stringFormat;
+	stringFormat.SetFormatFlags(Gdiplus::StringFormatFlagsDirectionVertical);
+	graphics->DrawString(item.label.data(), -1, font.get(), text_position, &stringFormat, &solid_brush);
 }
 
 void GDI_service::drawBars(bar_collection bars)
 {
 	for (int i = 0; i < bars.items.size(); ++i)
 	{
-		bars.items[i].coord.Width = 50;
-		//bars.items[i].coord.Height = bars.items[i].value / y_axis_segment_value * ;
+		bars.items[i].coord.Width = 50; //TODO: Move 50 to constants
+		bars.items[i].coord.Height = bars.items[i].value / y_axis_segment_phisical_value * y_axis_segment_pixels_value;
+		bars.items[i].coord.X = x_chart_shift + i * 60 + 10; //TODO: Move 10 to constants
+		bars.items[i].coord.Y = y_chart_shift + chart_height - bars.items[i].coord.Height;
 		drawRectangle(bars.items[i]);
 	}
 }
