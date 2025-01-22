@@ -8,7 +8,7 @@ Simple [GDI+](https://learn.microsoft.com/en-us/windows/win32/api/gdiplusheaders
 
 <div align="center">
 <div>
-<img src="Screenshots/app-demo.png" width="30%" />
+<img src="Screenshots/app-demo.png" width="60%" />
 </div>
 </div>
 
